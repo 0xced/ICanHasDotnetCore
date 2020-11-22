@@ -13,7 +13,7 @@ namespace ICanHasDotnetCore.NugetPackages
 {
     public class PackageRepositoryWrapper : IPackageRepositoryWrapper
     {
-        private readonly SourceRepository _sourceRepository = Repository.Factory.GetCoreV3("https://api.nuget.org/v3/index.json");
+        private readonly SourceRepository _sourceRepository = Repository.Factory.GetCoreV3(NuGetConstants.V3FeedUrl);
 
         private readonly SourceCacheContext _sourceCacheContext = new SourceCacheContext();
         private readonly ILogger _logger;
