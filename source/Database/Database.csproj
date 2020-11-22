@@ -16,12 +16,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Scripts\**\*.*" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
     <PackageReference Include="dbup" Version="4.5.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.3" />
     <ProjectReference Include="..\Magic\Magic.csproj" />
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </None>
     <None Update="PostDeploy.ps1">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>

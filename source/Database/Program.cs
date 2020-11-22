@@ -3,7 +3,6 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using DbUp;
 using ICanHasDotnetCore.Database.AlwaysRun;
-using Microsoft.Extensions.Configuration;
 
 namespace ICanHasDotnetCore.Database
 {
@@ -11,11 +10,14 @@ namespace ICanHasDotnetCore.Database
     {
         public static int Main(string[] args)
         {
-            var configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .Build();
+            if (args.Length != 1)
+            {
+                var appName = System.IO.Path.GetFileName(Process.GetCurrentProcess().MainModule?.FileName) ?? "Database";
+                Console.Error.WriteLine($"usage: {appName} connection-string");
+                return 1;
+            }
 
-            var connectionString = configuration["ConnectionString"];
+            var connectionString = args[0];
             Console.WriteLine($"Connection String: {connectionString}");
             Console.WriteLine("Ensuring Database");
             EnsureDatabase.For.SqlDatabase(connectionString);
