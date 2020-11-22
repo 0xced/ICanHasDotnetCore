@@ -78,22 +78,21 @@ namespace ICanHasDotnetCore.Web
             services.AddSingleton<IMoreInformationRepository, MoreInformationRepository>();
             services.AddSingleton<IKnownReplacementsRepository, KnownReplacementsRepository>();
             services.AddSingleton<GitHubScanner>();
-            services.AddDbContext<AppDbContext>((provider, optionsBuilder) =>
+            services.AddDbContextFactory<AppDbContext>((provider, builder) =>
             {
                 var dbSettings = provider.GetRequiredService<IDatabaseSettings>();
                 switch (dbSettings.Provider)
                 {
                     case DbProvider.Sqlite:
-                        optionsBuilder.UseSqlite(dbSettings.ConnectionString);
+                        builder.UseSqlite(dbSettings.ConnectionString);
                         break;
                     case DbProvider.SqlServer:
-                        optionsBuilder.UseSqlServer(dbSettings.ConnectionString);
+                        builder.UseSqlServer(dbSettings.ConnectionString);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-            }, contextLifetime: ServiceLifetime.Transient, optionsLifetime: ServiceLifetime.Singleton);
-            services.AddTransient<Func<AppDbContext>>(provider => () => new AppDbContext(provider.GetRequiredService<DbContextOptions>()));
+            });
         }
 
         private static void ValidateConfiguration(IServiceProvider serviceProvider)
@@ -132,7 +131,8 @@ namespace ICanHasDotnetCore.Web
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                using var context = app.ApplicationServices.GetRequiredService<AppDbContext>();
+                var contextFactory = app.ApplicationServices.GetRequiredService<IDbContextFactory<AppDbContext>>();
+                using var context = contextFactory.CreateDbContext();
                 EnsureDatabaseCreated(context.Database);
             }
 

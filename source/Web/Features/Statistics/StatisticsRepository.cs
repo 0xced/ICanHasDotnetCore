@@ -16,9 +16,9 @@ namespace ICanHasDotnetCore.Web.Features.Statistics
         // Only log packages found on Nuget.org
         private static readonly SupportType[] AddStatisticsFor = { SupportType.Unsupported, SupportType.Supported, SupportType.PreRelease };
 
-        private readonly Func<AppDbContext> _contextFactory;
+        private readonly IDbContextFactory<AppDbContext> _contextFactory;
 
-        public StatisticsRepository(Func<AppDbContext> contextFactory)
+        public StatisticsRepository(IDbContextFactory<AppDbContext> contextFactory)
         {
             _contextFactory = contextFactory;
         }
@@ -41,7 +41,7 @@ namespace ICanHasDotnetCore.Web.Features.Statistics
 
         private async Task AddStatisticAsync(PackageResult package, CancellationToken cancellationToken)
         {
-            await using var context = _contextFactory();
+            await using var context = _contextFactory.CreateDbContext();
             var packageStatistic = new PackageStatistic
             {
                 Name = package.PackageName,
@@ -57,13 +57,13 @@ namespace ICanHasDotnetCore.Web.Features.Statistics
 
         public async Task<IReadOnlyList<PackageStatistic>> GetAllPackageStatisticsAsync(CancellationToken cancellationToken)
         {
-            await using var context = _contextFactory();
+            await using var context = _contextFactory.CreateDbContext();
             return await context.PackageStatistics.AsNoTracking().ToListAsync(cancellationToken);
         }
 
         public async Task UpdateSupportTypeAsync(PackageStatistic stat, SupportType supportType, CancellationToken cancellationToken)
         {
-            await using var context = _contextFactory();
+            await using var context = _contextFactory.CreateDbContext();
             var packageStatistic = await context.PackageStatistics.FindAsync(new object[] {stat.Name}, cancellationToken);
             if (packageStatistic != null)
             {

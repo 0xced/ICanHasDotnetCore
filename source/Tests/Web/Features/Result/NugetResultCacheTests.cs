@@ -29,11 +29,12 @@ namespace ICanHasDotnetCore.Tests.Web.Features.Result
             var options = new DbContextOptionsBuilder<AppDbContext>()
                 .UseSqlite(_connection)
                 .Options;
-            using (var context = new AppDbContext(options))
+            var dbContextFactory = new AppDbContextFactory(options);
+            using (var context = dbContextFactory.CreateDbContext())
             {
                 context.Database.EnsureCreated();
             }
-            _cache = new DbNugetResultCache(() => new AppDbContext(options));
+            _cache = new DbNugetResultCache(dbContextFactory);
         }
 
         public void Dispose()
@@ -68,6 +69,21 @@ namespace ICanHasDotnetCore.Tests.Web.Features.Result
 
             // Assert
             package.None.Should().BeTrue();
+        }
+
+        private class AppDbContextFactory : IDbContextFactory<AppDbContext>
+        {
+            private readonly DbContextOptions<AppDbContext> _options;
+
+            public AppDbContextFactory(DbContextOptions<AppDbContext> options)
+            {
+                _options = options ?? throw new ArgumentNullException(nameof(options));
+            }
+
+            public AppDbContext CreateDbContext()
+            {
+                return new AppDbContext(_options);
+            }
         }
     }
 }
